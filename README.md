@@ -35,4 +35,4 @@ Before you can start using the  ChatBot, make sure you have the following prereq
 
 4. Download the required language models and data. https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGML/blob/main/llama-2-7b-chat.ggmlv3.q8_0.bin
 
-5. Put the model in the folder of your code file.
+5. Put the model in the root folder.
