@@ -35,4 +35,15 @@ Before you can start using the  ChatBot, make sure you have the following prereq
 
 4. Download the required language models and data. https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGML/blob/main/llama-2-7b-chat.ggmlv3.q8_0.bin
 
-5. Put the model in the root folder.
+5. Put the model in the folder of your code file.
+
+## Run API on local server
+
+1. Open cmd in the root folder and write this command to run the live server. 
+    ```bash
+    uvicorn main:app --reload
+    ```
+## API endpoints (you the links to use the API in frontend)
+
+- /docs -> You will see the automatic interactive API documentation
+- /llm_on_cpu/put_your_query here -> insert your query in the end section( It is a GET method and will return the answer to the prompt in JSON)

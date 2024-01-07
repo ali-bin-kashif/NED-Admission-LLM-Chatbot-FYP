@@ -1,0 +1,15 @@
+pypdf
+langchain
+accelerate
+torch
+bitsandbytes
+transformers
+sentence_transformers
+faiss_cpu
+huggingface_hub
+python-multipart
+fastapi
+pydantic
+uvicorn
+requests
+python-dotenv
