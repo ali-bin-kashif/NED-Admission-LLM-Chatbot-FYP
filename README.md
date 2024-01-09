@@ -43,7 +43,7 @@ Before you can start using the  ChatBot, make sure you have the following prereq
     ```bash
     uvicorn main:app --reload
     ```
-## API endpoints (you the links to use the API in frontend)
+## API endpoints
 
 - /docs -> You will see the automatic interactive API documentation
-- /llm_on_cpu/put_your_query here -> insert your query in the end section( It is a GET method and will return the answer to the prompt in JSON)
+- /llm_on_cpu/put_your_query_here -> insert your query in the end section( It is a GET method and will return the answer to the prompt in JSON)
