@@ -9,14 +9,13 @@ from pydantic import BaseModel
 
 DB_FAISS_PATH = 'vectorstore/db_faiss'
 
-custom_prompt_template = """Use the following pieces of information to answer the user's question.
-If you don't know the answer, just say this text
+custom_prompt_template = """Use the following pieces of information to answer the user's question. Try to give the best answer
+If you don't know the answer in any way, just say this text
 "Sorry I can't help you on this query, Please see the guidelines and FAQs on the following link: https://www.neduet.edu.pk/admission, or if you have some special query you can contact the administrator".
-
 Context: {context}
 Question: {question}
 
-Only return the helpful answer below and nothing else.
+Only return the helpful answer below in the best way you can.
 Helpful answer:
 """
 
