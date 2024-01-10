@@ -10,7 +10,8 @@ from pydantic import BaseModel
 DB_FAISS_PATH = 'vectorstore/db_faiss'
 
 custom_prompt_template = """Use the following pieces of information to answer the user's question.
-If you don't know the answer, just say that you don't know, don't try to make up an answer.
+If you don't know the answer, just say this text
+"Sorry I can't help you on this query, Please see the guidelines and FAQs on the following link: https://www.neduet.edu.pk/admission, or if you have some special query you can contact the administrator".
 
 Context: {context}
 Question: {question}
