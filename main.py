@@ -68,11 +68,10 @@ class validation(BaseModel):
 #Fast API
 app = FastAPI()
 
-# API endpoint to generate response
-@app.get("/llm_on_cpu/{query}")
-
-async def final_result(query):
+# API endpoint (POST Request)
+@app.post("/llm_on_cpu")
+async def final_result(item: validation):
         qa_result = qa_bot()
-        response = qa_result({'query': query})
+        response = qa_result({'query': item.prompt})
         return response
 
