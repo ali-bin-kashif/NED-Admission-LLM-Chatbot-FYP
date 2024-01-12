@@ -8,13 +8,12 @@ The university admission chatbot is a useful tool designed to provide assistance
 
 Before you can start using the  ChatBot, make sure you have the following prerequisites installed on your system:
 
-- Python 3.6 or higher
+- Python 3.9 or higher
 - Required Python packages (all packages are in requirement.txt)
     - langchain
-    - chainlit
-    - sentence-transformers
     - faiss
-    - PyPDF2 (for PDF document loading)
+    - PyPDF
+    - google-generativeai
 
 ## Installation
 
@@ -33,9 +32,11 @@ Before you can start using the  ChatBot, make sure you have the following prereq
     pip install -r requirements.txt
     ```
 
-4. Download the required language models and data. https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGML/blob/main/llama-2-7b-chat.ggmlv3.q8_0.bin
-
-5. Put the model in the folder of your code file.
+4. Create .env file for creating environment variables.
+5. Add your Google API key variable in the file. You can get your API key from here https://makersuite.google.com/app/apikey
+    ```bash
+    GOOGLE_API_KEY="Insert your google API key here"
+    ```
 
 ## Run API on local server
 
@@ -46,4 +47,4 @@ Before you can start using the  ChatBot, make sure you have the following prereq
 ## API endpoints
 
 - /docs -> You will see the automatic interactive API documentation
-- /llm_on_cpu/put_your_query_here -> insert your query in the end section( It is a GET method and will return the answer to the prompt in JSON)
+- /llm_on_cpu -> POST Method
