@@ -1,25 +1,34 @@
 # Importing libs and modules
 from langchain.prompts import PromptTemplate
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_google_genai import ChatGoogleGenerativeAI
+import google.generativeai as genai
 from langchain_community.vectorstores.faiss import FAISS
-from langchain_community.llms.ctransformers import CTransformers
-from langchain.chains import RetrievalQA
+from langchain.chains.question_answering import load_qa_chain
+# from langchain_community.llms.ctransformers import CTransformers
+# from langchain.chains import RetrievalQA
 from fastapi import FastAPI
 from pydantic import BaseModel
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+os.getenv("GOOGLE_API_KEY")
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 # Path of vectore database
 DB_FAISS_PATH = 'vectorstore/db_faiss'
 
 
 # Prompt template
-custom_prompt_template = """Use the following pieces of information to answer the user's question.
-If you don't know the answer in any way, just say this text
-"Sorry I can't help you on this query, if you are facing problem you can contact the administrator Mr. Imran Shaikh on help desk. Please see the guidelines and FAQs on the following link: https://www.neduet.edu.pk/admission".
-Context: {context}
-Question: {question}
-
-Only return the helpful answer below in the best way you can.
-Helpful answer:
+custom_prompt_template = """
+    Use the following pieces of information to answer the user's question.\n\n
+    Context: {context}
+    Question: {question}
+     
+    Try your best to give the answer. If you can't find the answer, say this "Sorry I can't help you on this query, Please see the guidelines and FAQs on the following link: https://www.neduet.edu.pk/admission, or contact administrator if you are facing problems".
+    Also try to add some your own wordings the describe the answer.
+    Helpful Answer:
 """
 
 def set_custom_prompt():
@@ -30,37 +39,37 @@ def set_custom_prompt():
                             input_variables=['context', 'question'])
     return prompt
 
-#Retrieval QA Chain
-def retrieval_qa_chain(llm, prompt, db):
-    qa_chain = RetrievalQA.from_chain_type(llm=llm,
-                                       chain_type='stuff',
-                                       retriever=db.as_retriever(search_kwargs={'k': 2}),
-                                       return_source_documents=True,
-                                       chain_type_kwargs={'prompt': prompt}
-                                       )
-    return qa_chain
+
 
 #Loading the model
 def load_llm():
     # Load the locally downloaded model here
-    llm = CTransformers(
-        model = "./llama-2-7b-chat.ggmlv3.q8_0.bin",
-        model_type="llama",
-        max_new_tokens = 1024,
-        temperature = 0.5
-    )
+    llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.6)
     return llm
 
-#QA Model Function
-def qa_bot():
-    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2",
-                                       model_kwargs={'device': 'cpu'})
-    db = FAISS.load_local(DB_FAISS_PATH, embeddings)
-    llm = load_llm()
-    qa_prompt = set_custom_prompt()
-    qa = retrieval_qa_chain(llm, qa_prompt, db)
+def get_conversational_chain():
 
-    return qa
+    prompt = set_custom_prompt()
+    
+    llm = load_llm()
+    chain = load_qa_chain(llm, chain_type="stuff", prompt=prompt)
+
+    return chain
+
+#QA Model Function
+def user_input(user_question):
+    embeddings = GoogleGenerativeAIEmbeddings(model = "models/embedding-001")
+    
+    db = FAISS.load_local(DB_FAISS_PATH, embeddings)
+    docs = db.similarity_search(user_question)
+    
+    chain = get_conversational_chain()
+    
+    response = chain(
+        {"input_documents":docs, "question": user_question}
+        , return_only_outputs=False)
+
+    return response
 
 #Pydantic object
 class validation(BaseModel):
@@ -71,7 +80,5 @@ app = FastAPI()
 # API endpoint (POST Request)
 @app.post("/llm_on_cpu")
 async def final_result(item: validation):
-        qa_result = qa_bot()
-        response = qa_result({'query': item.prompt})
+        response = user_input(item.prompt)
         return response
-
