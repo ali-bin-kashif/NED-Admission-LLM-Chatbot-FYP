@@ -5,13 +5,12 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 import google.generativeai as genai
 from langchain_community.vectorstores.faiss import FAISS
 from langchain.chains.question_answering import load_qa_chain
-# from langchain_community.llms.ctransformers import CTransformers
-# from langchain.chains import RetrievalQA
 from fastapi import FastAPI
 from pydantic import BaseModel
 import os
 from dotenv import load_dotenv
 
+# Setting Google API Key
 load_dotenv()
 os.getenv("GOOGLE_API_KEY")
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
