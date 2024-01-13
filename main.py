@@ -21,7 +21,7 @@ DB_FAISS_PATH = 'vectorstore/db_faiss'
 
 # Prompt template
 custom_prompt_template = """
-    Use the following pieces of information to answer the user's question.\n\n
+    Use the following pieces of information to answer the user's question.\n
     Context: {context}
     Question: {question}
      
@@ -66,7 +66,7 @@ def user_input(user_question):
     
     response = chain(
         {"input_documents":docs, "question": user_question}
-        , return_only_outputs=False)
+        , return_only_outputs=True)
 
     return response
 
