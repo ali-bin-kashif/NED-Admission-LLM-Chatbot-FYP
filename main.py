@@ -25,7 +25,7 @@ custom_prompt_template = """
     Context: {context}
     Question: {question}
      
-    Try your best to give the answer. If you can't find the answer, say this "Sorry I can't help you on this query, Please see the guidelines and FAQs on the following link: https://www.neduet.edu.pk/admission, or contact administrator if you are facing problems".
+    Try to give the best and correct answer only.
     Also try to add some your own wordings the describe the answer.
     Helpful Answer:
 """
