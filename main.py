@@ -42,10 +42,11 @@ def set_custom_prompt():
 
 #Loading the model
 def load_llm():
-    # Load the locally downloaded model here
     llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.6)
     return llm
 
+
+# Setting QA chain
 def get_conversational_chain():
 
     prompt = set_custom_prompt()
@@ -55,10 +56,13 @@ def get_conversational_chain():
 
     return chain
 
-#QA Model Function
+# User input function
 def user_input(user_question):
+    
+    # Set google embeddings
     embeddings = GoogleGenerativeAIEmbeddings(model = "models/embedding-001")
     
+    # Loading saved vectors from local path
     db = FAISS.load_local(DB_FAISS_PATH, embeddings)
     docs = db.similarity_search(user_question)
     
