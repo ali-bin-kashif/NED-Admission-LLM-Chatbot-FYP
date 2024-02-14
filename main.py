@@ -42,7 +42,7 @@ def set_custom_prompt():
 
 #Loading the model
 def load_llm():
-    llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.6)
+    llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.6, max_output_tokens=3000)
     return llm
 
 
