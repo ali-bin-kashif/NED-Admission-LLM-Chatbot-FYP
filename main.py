@@ -22,11 +22,13 @@ DB_FAISS_PATH = 'vectorstore/db_faiss'
 # Prompt template
 custom_prompt_template = """
     Use the following pieces of information to answer the user's question.\n
+    Please note that here questions will be about NED University of Engineering and Technology.
+    So if "NED University" is not mentioned in the question, add it at the end and always consider
+    that user is asking about questions regarding this university.
     Context: {context}
     Question: {question}
      
-    Try to give the best and correct answer only.
-    Also try to add some your own wordings the describe the answer.
+    Try to give the best and correct answer only. Also describe the answer more.
     Helpful Answer:
 """
 
@@ -42,7 +44,7 @@ def set_custom_prompt():
 
 #Loading the model
 def load_llm():
-    llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.6, max_output_tokens=3000)
+    llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.6, max_output_tokens=2000)
     return llm
 
 
@@ -70,7 +72,7 @@ def user_input(user_question):
     
     response = chain(
         {"input_documents":docs, "question": user_question}
-        , return_only_outputs=True)
+        , return_only_outputs=False)
 
     return response
 
