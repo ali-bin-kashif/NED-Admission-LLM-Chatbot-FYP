@@ -29,6 +29,8 @@ custom_prompt_template = """
     Question: {question}
      
     Try to give the best and correct answer only. Also describe the answer more.
+    If you don't know the answer just say "Sorry, I am unable to help you on this, if you are facing
+    problems you can contact the administrator."
     Helpful Answer:
 """
 
