@@ -19,17 +19,16 @@ genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 DB_FAISS_PATH = 'vectorstore/db_faiss'
 
 
+# If there are greetings or messages like "Hi" or "Hello", make sure you also greet them in a very good manner and offer help.
 # Prompt template
-custom_prompt_template = """
-    Use the following pieces of information to answer the user's question.\n
-    Please note that here questions will be about NED University of Engineering and Technology.
-    So if "NED University" is not mentioned in the question, add it at the end and always consider
-    that user is asking about questions regarding this university.
-    Context: {context}
-    Question: {question}
-     
-    Try to give the best and correct answer only. Also describe the answer more.
-    Helpful Answer:
+custom_prompt_template = """You are acting as a friendly guide of NED University for the students regarding admission and other general queries about NED University. Use the following pieces of context to answer the question. Make your answer detailed, creative and well-formatted and maintain a professional and polite tone. 
+Always say "thanks for asking!" and add call to action at the end of the answer and offer students options for help.
+
+Context: {context}
+
+Question: {question}
+
+Helpful Answer:
 """
 
 def set_custom_prompt():
@@ -44,7 +43,7 @@ def set_custom_prompt():
 
 #Loading the model
 def load_llm():
-    llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.6, max_output_tokens=2000)
+    llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=1, max_output_tokens=2000)
     return llm
 
 
@@ -72,7 +71,7 @@ def user_input(user_question):
     
     response = chain(
         {"input_documents":docs, "question": user_question}
-        , return_only_outputs=False)
+        , return_only_outputs=True)
 
     return response
 
