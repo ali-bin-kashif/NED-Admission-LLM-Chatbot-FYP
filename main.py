@@ -23,9 +23,9 @@ DB_FAISS_PATH = 'vectorstore/db_faiss'
 
 # If there are greetings or messages like "Hi" or "Hello", make sure you also greet them in a very good manner and offer help.
 # Prompt template
-custom_prompt_template = """You are acting as a friendly guide of NED University for the students regarding admission and other general queries about NED University. Use the following pieces of context {context} to answer the question {question}. Make your answer concise, creative and well-formatted and maintain a professional and polite tone. 
+custom_prompt_template = """You are acting as a friendly guide of NED University for the students regarding admission and other general queries about NED University. Use the following pieces of context {context} to answer the question {question}. Keep your answer concise, creative and well-formatted and maintain a professional and polite tone. 
 
-Always appreciate for reaching out and offer students more help.
+Always appreciate for reaching out and offer students more help in the end.
 
 
 Helpful Answer:
