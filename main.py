@@ -2,6 +2,7 @@
 from langchain.prompts import PromptTemplate
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_groq import ChatGroq
 import google.generativeai as genai
 from langchain_community.vectorstores.faiss import FAISS
 from langchain.chains.question_answering import load_qa_chain
@@ -14,6 +15,7 @@ from dotenv import load_dotenv
 load_dotenv()
 os.getenv("GOOGLE_API_KEY")
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+groq_api_key=os.getenv('GROQ_API_KEY')
 
 # Path of vectore database
 DB_FAISS_PATH = 'vectorstore/db_faiss'
@@ -21,12 +23,10 @@ DB_FAISS_PATH = 'vectorstore/db_faiss'
 
 # If there are greetings or messages like "Hi" or "Hello", make sure you also greet them in a very good manner and offer help.
 # Prompt template
-custom_prompt_template = """You are acting as a friendly guide of NED University for the students regarding admission and other general queries about NED University. Use the following pieces of context to answer the question. Make your answer detailed, creative and well-formatted and maintain a professional and polite tone. 
-Always say "thanks for asking!" and add call to action at the end of the answer and offer students options for help.
+custom_prompt_template = """You are acting as a friendly guide of NED University for the students regarding admission and other general queries about NED University. Use the following pieces of context {context} to answer the question {question}. Make your answer concise, creative and well-formatted and maintain a professional and polite tone. 
 
-Context: {context}
+Always appreciate for reaching out and offer students more help.
 
-Question: {question}
 
 Helpful Answer:
 """
@@ -43,7 +43,8 @@ def set_custom_prompt():
 
 #Loading the model
 def load_llm():
-    llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=1, max_output_tokens=2000)
+    # llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=1, max_output_tokens=2000)
+    llm=ChatGroq(groq_api_key=groq_api_key, model_name="Llama3-8b-8192", temperature=0.6)
     return llm
 
 
