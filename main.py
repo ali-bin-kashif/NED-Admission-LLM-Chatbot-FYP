@@ -137,4 +137,5 @@ app = FastAPI()
 @app.post("/llm_on_cpu")
 async def final_result(item: validation):
         response = user_input(item.prompt)
-        return response['answer']
+        response = {'response' : response['answer']}
+        return response
