@@ -32,8 +32,8 @@ def create_vector_db():
     print(len(documents))
     
     # Split the text into chunks
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=512,
-                                                   chunk_overlap=64)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,
+                                                   chunk_overlap=200)
     texts = text_splitter.split_documents(documents)
 
     # Using hugging face embeddings
