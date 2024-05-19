@@ -4,6 +4,7 @@ langchain
 pypdf
 faiss-cpu
 langchain_google_genai
+langchain-community
 fastapi
 pydantic
 uvicorn
