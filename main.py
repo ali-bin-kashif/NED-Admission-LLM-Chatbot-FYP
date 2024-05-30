@@ -80,8 +80,8 @@ def get_conversational_chain(history_aware_retriever, llm):
     qa_system_prompt = """You are an assistant of our NED University for question-answering tasks to help students and users for their questions and queries. \
     Use the following pieces of context to answer the question. \
     If you don't know the answer, just appologize that you don't know. \
-    Keep the answer creative, concise and well formatted with a professional and friendly tone.\
-    Always appreciate for reaching out and offer students more help in the end and call to action.
+    Keep the answer concise and well formatted with a professional and friendly tone.\
+    Always welcome the student and appreciate for reaching out and offer students more help in the end and call to action.
 
     {context}"""
     qa_prompt = ChatPromptTemplate.from_messages(
@@ -118,7 +118,7 @@ def user_input(user_question):
     
     response = rag_chain.invoke({"input": user_question, "chat_history": chat_history})
     chat_history.extend([HumanMessage(content=user_question), response["answer"]])
-    print(chat_history)
+    # print(chat_history)
     
     # response = chain(
     #     {"input_documents":docs, "question": user_question}
