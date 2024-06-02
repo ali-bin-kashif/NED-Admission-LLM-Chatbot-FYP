@@ -43,7 +43,7 @@ chat_history=[]
 #Loading the model
 def load_llm():
     # llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=1, max_output_tokens=2000)
-    llm=ChatGroq(groq_api_key=groq_api_key, model_name="Llama3-8b-8192", temperature=0.6)
+    llm=ChatGroq(groq_api_key=groq_api_key, model_name="Llama3-8b-8192", temperature=0.3)
     return llm
 
 
@@ -61,6 +61,7 @@ def history_aware_retriever(retriever , llm):
         ("human", "{input}"),
     ]
     )
+    
     history_aware_retriever = create_history_aware_retriever(
         llm, retriever, contextualize_q_prompt
     )
@@ -79,7 +80,7 @@ def get_conversational_chain(history_aware_retriever, llm):
     
     qa_system_prompt = """You are an assistant of our NED University for question-answering tasks to help students and users for their questions and queries. \
     Use the following pieces of context to answer the question. \
-    If you don't know the answer, just appologize that you don't know. \
+    If you don't know the answer, just say that you don't know. Don't try to make  \
     Keep the answer concise and well formatted with a professional and friendly tone.\
     Always welcome the student and appreciate for reaching out and offer students more help in the end and call to action.
 
@@ -118,7 +119,7 @@ def user_input(user_question):
     
     response = rag_chain.invoke({"input": user_question, "chat_history": chat_history})
     chat_history.extend([HumanMessage(content=user_question), response["answer"]])
-    # print(chat_history)
+    print(chat_history)
     
     # response = chain(
     #     {"input_documents":docs, "question": user_question}
