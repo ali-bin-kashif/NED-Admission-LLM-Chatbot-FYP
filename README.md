@@ -14,6 +14,7 @@ Before you can start using the  ChatBot, make sure you have the following prereq
     - faiss
     - PyPDF
     - google-generativeai
+    - langchain_groq
 
 ## Installation
 
@@ -33,9 +34,13 @@ Before you can start using the  ChatBot, make sure you have the following prereq
     ```
 
 4. Create .env file for creating environment variables.
-5. Add your Google API key variable in the file. You can get your API key from here https://makersuite.google.com/app/apikey
+5. Add your Google and Groq API key variable in the file. You can get your API key from here
+- For Google API Key: https://makersuite.google.com/app/apikey
+- For Groq API Key: https://console.groq.com/playground
+
     ```bash
     GOOGLE_API_KEY="Insert your google API key here"
+    GROQ_API_KEY = 'Insert your Groq Api here'
     ```
 
 ## Run API on local server
@@ -44,6 +49,7 @@ Before you can start using the  ChatBot, make sure you have the following prereq
     ```bash
     uvicorn main:app --reload
     ```
+    
 ## API endpoints
 
 - /docs -> You will see the automatic interactive API documentation
