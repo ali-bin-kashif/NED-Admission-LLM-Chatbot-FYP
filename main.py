@@ -1,11 +1,11 @@
 # Importing libs and modules
-# from langchain.prompts import PromptTemplate
+
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
-# from langchain import hub
 from langchain_groq import ChatGroq
 import google.generativeai as genai
+
 from langchain_community.vectorstores.faiss import FAISS
-# from langchain.chains.question_answering import load_qa_chain
+
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.messages import HumanMessage
@@ -18,6 +18,8 @@ from pydantic import BaseModel
 import os
 from dotenv import load_dotenv
 
+from chat_database import ChatDatabase
+
 # Setting Google API Key
 load_dotenv()
 os.getenv("GOOGLE_API_KEY")
@@ -27,17 +29,20 @@ groq_api_key=os.getenv('GROQ_API_KEY')
 # Path of vectore database
 DB_FAISS_PATH = 'vectorstore/db_faiss'
 
+# Initialize Chat database object
+chat_obj = ChatDatabase(
+    'chatbot-user-chats-data.c32iyywau6nz.ap-south-1.rds.amazonaws.com',
+    'admin',
+    'alihamza123',
+    'chat_history'
+)
 
-chat_history=[]
+user_chat_details = {
+    'user_id' : 1,
+    'chat_id' : 1
+}
 
-# def set_custom_prompt():
-#     """
-#     Prompt template for QA retrieval for each vectorstore
-#     """
-#     prompt = PromptTemplate(template=custom_prompt_template,
-#                             input_variables=['context', 'question'])
-#     return prompt
-
+chat_history= chat_obj.fetch_chat_data(user_chat_details)
 
 
 #Loading the model
@@ -71,18 +76,14 @@ def history_aware_retriever(retriever , llm):
 # Setting QA chain
 def get_conversational_chain(history_aware_retriever, llm):
 
-    # prompt = set_custom_prompt()
-    
-    # llm = load_llm()
-    # chain = load_qa_chain(llm, chain_type="stuff", prompt=prompt)
-
-    # return chain
     
     qa_system_prompt = """You are an assistant of our NED University for question-answering tasks to help students and users for their questions and queries. \
     Use the following pieces of context to answer the question. \
-    If you don't know the answer, just say that you don't know. Don't try to make  \
+    If you don't know the answer, just say that you don't know. Don't try to make wrong answers \
+    Don't give answer to irrelevant or abusive questions and words, just appoligize\
     Keep the answer concise and well formatted with a professional and friendly tone.\
-    Always welcome the student and appreciate for reaching out and offer students more help in the end and call to action.
+    Always remember that your scope is limited to NED University and guiding students, if you get question out of this scope, command the user the search this on Goolge, don't try to answer it by yourself.
+    Always welcome and appreciate for reaching out and offer students more help in the end and call to action.
 
     {context}"""
     qa_prompt = ChatPromptTemplate.from_messages(
@@ -113,18 +114,28 @@ def user_input(user_question):
     llm = load_llm()
     
     history_retriever = history_aware_retriever(retriever, llm)
-    # docs = db.similarity_search(user_question)
     
     rag_chain = get_conversational_chain(history_retriever, llm)
     
     response = rag_chain.invoke({"input": user_question, "chat_history": chat_history})
-    chat_history.extend([HumanMessage(content=user_question), response["answer"]])
-    print(chat_history)
+    # chat_history.extend([HumanMessage(content=user_question), response["answer"]])
+    chat_history.extend([user_question, response["answer"]])
     
-    # response = chain(
-    #     {"input_documents":docs, "question": user_question}
-    #     , return_only_outputs=True)
-
+    if(chat_obj.does_chat_exist(user_chat_details)):
+        
+        chat_obj.update_existing_chat(
+            user_chat_details['user_id'],
+            user_chat_details['chat_id'],
+            chat_history
+        )
+    else:
+        chat_obj.create_new_chat(
+            user_chat_details['user_id'],
+            user_chat_details['chat_id'],
+            chat_history
+        )
+        
+    
     return response
 
 #Pydantic object
@@ -137,5 +148,6 @@ app = FastAPI()
 # API endpoint (POST Request)
 @app.post("/llm_on_cpu")
 async def final_result(item: validation):
+        print(chat_history)
         response = user_input(item.prompt)
         return response

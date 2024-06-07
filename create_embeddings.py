@@ -24,7 +24,7 @@ genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 def create_vector_db():
     
     # Load data from website
-    website_loader = WebBaseLoader(['https://cct.neduet.edu.pk/research', 'https://en.wikipedia.org/wiki/NED_University_of_Engineering_%26_Technology', 'https://cct.neduet.edu.pk/contact-us', 'https://cct.neduet.edu.pk/aboutus', 'https://cct.neduet.edu.pk/achievements'])
+    website_loader = WebBaseLoader(['https://cct.neduet.edu.pk/research', 'https://cct.neduet.edu.pk/contact-us', 'https://cct.neduet.edu.pk/aboutus', 'https://cct.neduet.edu.pk/achievements'])
     
     web_doc = website_loader.load()
 
