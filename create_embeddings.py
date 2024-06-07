@@ -24,9 +24,15 @@ genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 def create_vector_db():
     
     # Load data from website
-    website_loader = WebBaseLoader(['https://cct.neduet.edu.pk/research', 'https://cct.neduet.edu.pk/contact-us', 'https://cct.neduet.edu.pk/aboutus', 'https://cct.neduet.edu.pk/achievements'])
+    website_loader = WebBaseLoader(['https://www.neduet.edu.pk/faculties_and_departments', 'https://www.neduet.edu.pk/academic_programmes', 'https://www.neduet.edu.pk/asrb', 'https://www.neduet.edu.pk/teaching_system', 'https://www.neduet.edu.pk/students_affairs', 'https://www.neduet.edu.pk/students_chapter_of_professional_bodies', 'https://www.neduet.edu.pk/contact-us'])
+    website_loader.requests_kwargs = {'verify':False}
+    
+    civil_dept_web = WebBaseLoader(['https://ced.neduet.edu.pk/'])
+    
+    csit_dept_web = WebBaseLoader(['https://cct.neduet.edu.pk/research', 'https://cct.neduet.edu.pk/contact-us', 'https://cct.neduet.edu.pk/aboutus', 'https://cct.neduet.edu.pk/achievements'])
     
     web_doc = website_loader.load()
+  
 
     # Load the PDF documents
     loader = DirectoryLoader(DATA_PATH,
