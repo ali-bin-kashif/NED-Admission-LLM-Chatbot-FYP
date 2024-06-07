@@ -162,16 +162,5 @@ if __name__ == "__main__":
         'chat_history'
     )
 
-    # chat.does_chat_exist(2,1)
-
-
-    # user_chat_ids = {
-    #     'user_id' : 1,
-    #     'chat_id' : 1
-    # }
-    # print(chat.fetch_chat_data(user_chat_ids))
-    
-    # chat.delete_chat(1,1)
-
 
 
