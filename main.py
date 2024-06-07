@@ -17,6 +17,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import os
 from dotenv import load_dotenv
+import json
 
 from chat_database import ChatDatabase
 
@@ -37,18 +38,21 @@ chat_obj = ChatDatabase(
     'chat_history'
 )
 
-user_chat_details = {
-    'user_id' : 1,
-    'chat_id' : 1
-}
+user_chat_details = {}
 
-chat_history= chat_obj.fetch_chat_data(user_chat_details)
+chat_history = []
+print(chat_history)
+
+def fetch_chat_history():
+    global chat_history
+    chat_history= chat_obj.fetch_chat_data(user_chat_details)
+    print(chat_history)
 
 
 #Loading the model
 def load_llm():
     # llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=1, max_output_tokens=2000)
-    llm=ChatGroq(groq_api_key=groq_api_key, model_name="Llama3-8b-8192", temperature=0.3)
+    llm=ChatGroq(groq_api_key=groq_api_key, model_name="Llama3-8b-8192", temperature=0.5)
     return llm
 
 
@@ -120,7 +124,7 @@ def user_input(user_question):
     response = rag_chain.invoke({"input": user_question, "chat_history": chat_history})
     # chat_history.extend([HumanMessage(content=user_question), response["answer"]])
     chat_history.extend([user_question, response["answer"]])
-    
+    print(chat_history)
     if(chat_obj.does_chat_exist(user_chat_details)):
         
         chat_obj.update_existing_chat(
@@ -134,6 +138,8 @@ def user_input(user_question):
             user_chat_details['chat_id'],
             chat_history
         )
+    
+    
         
     
     return response
@@ -141,6 +147,10 @@ def user_input(user_question):
 #Pydantic object
 class validation(BaseModel):
     prompt: str
+    
+class user_authentication(BaseModel):
+    user_id: int
+    chat_id: int
     
 #Fast API
 app = FastAPI()
@@ -151,3 +161,22 @@ async def final_result(item: validation):
         print(chat_history)
         response = user_input(item.prompt)
         return response
+    
+@app.post("/user_sign_in")
+async def sign_in(item: user_authentication):
+
+    global user_chat_details
+    user_chat_details = {
+        'user_id' : item.user_id,
+        'chat_id' : item.chat_id
+    }
+    
+    
+    if(chat_obj.does_chat_exist(user_chat_details)):
+        fetch_chat_history()
+    else:
+        global chat_history
+        chat_history=[]
+        print(chat_history)
+    
+    return {"message": "User signed in successfully", "user_id": item.user_id, "chat_id": item.chat_id}
