@@ -27,9 +27,19 @@ def create_vector_db():
     website_loader = WebBaseLoader(['https://www.neduet.edu.pk/faculties_and_departments', 'https://www.neduet.edu.pk/academic_programmes', 'https://www.neduet.edu.pk/asrb', 'https://www.neduet.edu.pk/teaching_system', 'https://www.neduet.edu.pk/students_affairs', 'https://www.neduet.edu.pk/students_chapter_of_professional_bodies', 'https://www.neduet.edu.pk/contact-us'])
     website_loader.requests_kwargs = {'verify':False}
     
-    civil_dept_web = WebBaseLoader(['https://ced.neduet.edu.pk/'])
+    civil_dept_web = WebBaseLoader(['https://ced.neduet.edu.pk/']).load()
     
-    csit_dept_web = WebBaseLoader(['https://cct.neduet.edu.pk/research', 'https://cct.neduet.edu.pk/contact-us', 'https://cct.neduet.edu.pk/aboutus', 'https://cct.neduet.edu.pk/achievements'])
+    csit_dept_web = WebBaseLoader(['https://cct.neduet.edu.pk/research', 'https://cct.neduet.edu.pk/contact-us', 'https://cct.neduet.edu.pk/aboutus', 'https://cct.neduet.edu.pk/achievements', 'https://cis.neduet.edu.pk/' , 'https://cis.neduet.edu.pk/about_us', 'https://se.neduet.edu.pk/']).load()
+    
+    other_depts_web = WebBaseLoader(['https://eqd.neduet.edu.pk', 'https://end.neduet.edu.pk', 'https://ped.neduet.edu.pk']).load()
+    
+    electrical_depts_web = WebBaseLoader(['https://eed.neduet.edu.pk', 'https://eld.neduet.edu.pk/', 'https://tcd.neduet.edu.pk/', 'https://bmd.neduet.edu.pk/']).load()
+    
+    mechanical_manf_depts_web = WebBaseLoader(['https://med.neduet.edu.pk/', 'https://imd.neduet.edu.pk/', 'https://txd.neduet.edu.pk/', 'https://atd.neduet.edu.pk/']).load()
+    
+    arch_sci_depts = WebBaseLoader(['https://ard.neduet.edu.pk/', 'https://emd.neduet.edu.pk/', 'https://dph.neduet.edu.pk/aboutus', 'https://dcy.neduet.edu.pk/', 'https://dmt.neduet.edu.pk/', 'https://del.neduet.edu.pk/', 'https://des.neduet.edu.pk/']).load()
+    
+    
     
     web_doc = website_loader.load()
   
@@ -41,13 +51,13 @@ def create_vector_db():
 
     documents = loader.load()
     
-    docs = documents + web_doc
+    docs = documents + web_doc + civil_dept_web + csit_dept_web + other_depts_web + electrical_depts_web + mechanical_manf_depts_web + arch_sci_depts
     
     print(len(docs))
     
     # Split the text into chunks
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,
-                                                   chunk_overlap=200)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500,
+                                                   chunk_overlap=100)
     texts = text_splitter.split_documents(docs)
 
     # Using hugging face embeddings

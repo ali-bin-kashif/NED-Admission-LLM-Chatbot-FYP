@@ -27,7 +27,8 @@ class ChatDatabase():
         except Error as e:
             print(f"Error: {e}")
             
-        
+    
+    # Method to create new chat    
     def create_new_chat(self, user_id, chat_id, chat_history):
         
         insert_query = """
@@ -55,7 +56,8 @@ class ChatDatabase():
         # Commit the transaction
         self.connection.commit()
         
-        
+    
+    # Method to update existing chat   
     def update_existing_chat(self, user_id, chat_id, chat_history):
         
         update_query = """
@@ -83,7 +85,9 @@ class ChatDatabase():
         
         # Commit the transaction
         self.connection.commit()
-        
+    
+    
+    # Method to delete chat   
     def delete_chat(self, user_id, chat_id):
         
         delete_query = """
@@ -102,7 +106,8 @@ class ChatDatabase():
         
         # Commit the transaction
         self.connection.commit()
-        
+    
+    # Method to check if chat exist or not    
     def does_chat_exist(self, user_chat_ids) -> bool:
         
         fetch_query = """
@@ -123,7 +128,8 @@ class ChatDatabase():
         else:
             return False
         
-        
+    
+    # Method to fetch chat history    
     def fetch_chat_data(self, user_chat_ids):
         
         fetch_query = """
