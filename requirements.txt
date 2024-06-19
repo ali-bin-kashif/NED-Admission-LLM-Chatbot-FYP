@@ -10,3 +10,4 @@ pydantic
 uvicorn
 requests
 langchain_groq
+mysql
