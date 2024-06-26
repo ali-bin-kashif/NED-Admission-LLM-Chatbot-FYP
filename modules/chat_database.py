@@ -1,6 +1,14 @@
 import mysql.connector
 from mysql.connector import Error
 import json
+import os
+
+# Fetching credentials from env
+host = os.getenv('DATABASE_HOST')
+db_pass = os.getenv('DATABASE_PW')
+db_user = os.getenv('DATABASE_USER')
+db = os.getenv('DATABASE')
+
 
 class ChatDatabase():
     
@@ -161,12 +169,9 @@ class ChatDatabase():
             
 if __name__ == "__main__":       
         
-    chat = ChatDatabase(
-        'chatbot-user-chats-data.c32iyywau6nz.ap-south-1.rds.amazonaws.com',
-        'admin',
-        'alihamza123',
-        'chat_history'
-    )
+    chat = ChatDatabase(host,db_user,db_pass,db)
+    print(chat.host)
+
 
 
 
