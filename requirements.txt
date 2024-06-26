@@ -11,3 +11,4 @@ uvicorn
 requests
 langchain_groq
 mysql
+PyJWT
