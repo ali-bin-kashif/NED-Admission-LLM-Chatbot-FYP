@@ -10,5 +10,5 @@ pydantic
 uvicorn
 requests
 langchain_groq
-mysql
+mysql-connector-python
 PyJWT
