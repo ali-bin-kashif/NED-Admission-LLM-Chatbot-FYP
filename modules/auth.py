@@ -1,10 +1,9 @@
 
 import os
 
-from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from pydantic import BaseModel
-from typing import Dict
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+
 from datetime import datetime, timedelta
 import jwt
 import mysql.connector
@@ -17,26 +16,12 @@ DB_USER = os.getenv('DATABASE_USER')
 DB_NAME = os.getenv('DATABASE')
 
 # Secret key to encode and decode JWT tokens
-
-
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 
-
-class User(BaseModel):
-    username: str
-    password: str
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-    
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-
-app = FastAPI()
-
-def create_access_token(data: dict, expires_delta: timedelta = timedelta(minutes=1)):
+def create_access_token(data: dict, expires_delta: timedelta = timedelta(minutes=60)):
     to_encode = data.copy()
     expire = datetime.utcnow() + expires_delta
     to_encode.update({"exp": expire})
@@ -61,7 +46,7 @@ def get_user_from_db(username: str):
         print(f"Error connecting to MySQL: {e}")
         return None
 
-def create_user_in_db(username: str, password: str):
+def create_user_in_db(username: str, email: str, password: str):
     try:
         connection = mysql.connector.connect(
             host=DB_HOST,
@@ -70,7 +55,7 @@ def create_user_in_db(username: str, password: str):
             database=DB_NAME
         )
         cursor = connection.cursor()
-        cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, password))
+        cursor.execute("INSERT INTO users (username, email, password) VALUES (%s, %s, %s)", (username, email, password))
         connection.commit()
         cursor.close()
         connection.close()
@@ -101,33 +86,4 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         raise credentials_exception
     return user
 
-@app.post("/register", response_model=User)
-def register(user: User):
-    existing_user = get_user_from_db(user.username)
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username already registered",
-        )
-    create_user_in_db(user.username, user.password)
-    return user
 
-@app.post("/token", response_model=Token)
-def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = authenticate_user(form_data.username, form_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    access_token = create_access_token(data={"sub": user["username"]})
-    return {"access_token": access_token, "token_type": "bearer"}
-
-@app.get("/users/me", response_model=User)
-def read_users_me(current_user: User = Depends(get_current_user)):
-    return current_user
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000)
