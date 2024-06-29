@@ -1,6 +1,8 @@
 # Import necessary libraries and modules
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from langchain_groq import ChatGroq
+from langchain_openai import ChatOpenAI
 import google.generativeai as genai
 from langchain_community.vectorstores.faiss import FAISS
 from langchain.chains import create_retrieval_chain
@@ -12,6 +14,10 @@ from modules.chat_database import ChatDatabase, host, db_pass, db_user, db
 from dotenv import load_dotenv
 import os
 
+from langchain_pinecone import PineconeVectorStore
+
+from pinecone import Pinecone
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -20,6 +26,12 @@ genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 # Set Groq API key
 groq_api_key = os.getenv('GROQ_API_KEY')
+open_ai_key = os.getenv('OPEN_AI_KEY')
+pinecone_api_key = os.getenv('PINECONE_API_KEY')
+
+
+# Connecting with Pinecone
+
 
 # Path to the FAISS vector database
 DB_FAISS_PATH = 'vectorstore/db_faiss'
@@ -47,7 +59,11 @@ def load_llm():
     Returns:
         llm (ChatGroq): The loaded language model.
     """
-    llm = ChatGroq(groq_api_key=groq_api_key, model_name="Llama3-8b-8192", temperature=0.5)
+    # Chat Groq Model
+    # llm = ChatGroq(groq_api_key=groq_api_key, model_name="Llama3-8b-8192", temperature=0.5)
+    
+    # Open AI Model
+    llm = ChatOpenAI(model='gpt-4o', temperature=0.5, api_key=open_ai_key)
     return llm
 
 def history_aware_retriever(retriever, llm):
@@ -99,6 +115,7 @@ def get_conversational_chain(history_aware_retriever, llm):
     Always remember that your scope is limited to NED University and guiding students, if you get question out of this scope, command the user to search this on Google, don't try to answer it by yourself.\
     When user asks information of department(s) always tell them to visit the department website and ask them if they want the website link.\
     If users ask to conduct or generate a mockup or sample test paper, make a detailed sample test with all the relevant sections.\
+    Check the language of the prompt and try to answer in that language.\
     Always welcome and appreciate for reaching out and offer students more help in the end and call to action and include contact or email if possible.
 
     {context}"""
@@ -128,10 +145,20 @@ def user_input(user_question):
         response: The response from the language model.
     """
     # Set Google embeddings
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+    # embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+    
+    # Set OPEN AI embeddings
+    embeddings = OpenAIEmbeddings(model='text-embedding-3-large')
     
     # Load saved vectors from the local path
-    db = FAISS.load_local(DB_FAISS_PATH, embeddings, allow_dangerous_deserialization=True)
+    pc = Pinecone(pinecone_api_key)
+    
+    index = pc.Index('langchain-ned-data')
+    
+    # index.query()
+    # db = FAISS.load_local(DB_FAISS_PATH, embeddings, allow_dangerous_deserialization=True)
+    
+    db = PineconeVectorStore(index_name = "langchain-ned-data", embedding = embeddings)
     retriever = db.as_retriever()
     
     # Load the language model

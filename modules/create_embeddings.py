@@ -1,10 +1,16 @@
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores.faiss import FAISS
+# from langchain_community.vectorstores.pinecone import Pinecone
 from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader
 from langchain_community.document_loaders import WebBaseLoader
 import google.generativeai as genai
+
+from langchain_pinecone import PineconeVectorStore
+
+from pinecone import Pinecone
 import os
 from dotenv import load_dotenv
 
@@ -20,8 +26,17 @@ load_dotenv()
 os.getenv("GOOGLE_API_KEY")
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
+pinecone_api_key = os.getenv("PINECONE_API_KEY")
+print(pinecone_api_key)
+
+
 # Create vector database
 def create_vector_db():
+    
+    # Connecting with Pinecone
+    pc = Pinecone(pinecone_api_key)
+    
+    index = pc.Index('langchain-ned-data')
     
     # Load data from website
     website_loader = WebBaseLoader(['https://www.neduet.edu.pk/faculties_and_departments', 'https://www.neduet.edu.pk/academic_programmes', 'https://www.neduet.edu.pk/asrb', 'https://www.neduet.edu.pk/teaching_system', 'https://www.neduet.edu.pk/students_affairs', 'https://www.neduet.edu.pk/students_chapter_of_professional_bodies', 'https://www.neduet.edu.pk/contact-us'])
@@ -56,19 +71,23 @@ def create_vector_db():
     print(len(docs))
     
     # Split the text into chunks
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500,
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=300,
                                                    chunk_overlap=100)
     texts = text_splitter.split_documents(docs)
 
-    # Using hugging face embeddings
-    embeddings = GoogleGenerativeAIEmbeddings(model = "models/embedding-001")
+    # Using Google Emebeddings
+    # embeddings = GoogleGenerativeAIEmbeddings(model = "models/embedding-001")
+    
+    # Using Open AI Embeddings
+    embeddings = OpenAIEmbeddings(model='text-embedding-3-large')
     
     # Converting all the chunks into text embeddings (Converting text into vectors)
     # After text is converted into vectors, it can be used to many task like classifications etc.
-    db = FAISS.from_documents(texts, embeddings)
+    
+    db = PineconeVectorStore.from_documents(texts, embeddings, index_name="langchain-ned-data")
     
     # Saving the embeddings in the vector store
-    db.save_local(DB_FAISS_PATH)
+    # db.save_local(DB_FAISS_PATH)
     print("Succesfully made and saved text embeddings!")
 
 if __name__ == "__main__":

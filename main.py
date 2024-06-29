@@ -2,14 +2,13 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from modules import models
 from modules import chatbot_functions as chatbot
+from mysql.connector import Error
 # import os
 # from dotenv import load_dotenv
 # import json
 
 from modules import auth
 
-
-    
 #Fast API
 app = FastAPI()
 
@@ -62,22 +61,32 @@ async def sign_in(item: models.ChatInfo):
     
     print(chatbot.user_chat_details)
     
-    chat_exist = chatbot.chat_obj.does_chat_exist(chatbot.user_chat_details)
-    print(chat_exist)
-    if(chat_exist):
-        chatbot.fetch_chat_history()
-        return {"message": "Chat history fetched successfully",
-            "user_id": user['id'],
-            "chat_id": item.chat_id,
-            'username': item.username}
-    else:
-        chatbot.chat_history=[]
-        print(chatbot.chat_history)
-        return {"message": "Chat created successfully",
-            "user_id": user['id'],
-            "chat_id": item.chat_id,
-            'username': item.username}
     
+    try:
+        chat_exist = chatbot.chat_obj.does_chat_exist(chatbot.user_chat_details)
+        print(chat_exist)
+        if(chat_exist):
+            chatbot.fetch_chat_history()
+            return {"message": "Chat history fetched successfully",
+                "user_id": user['id'],
+                "chat_id": item.chat_id,
+                'username': item.username,
+                'success' : True}
+        else:
+            chatbot.chat_history=[]
+            print(chatbot.chat_history)
+            return {"message": "Chat created successfully",
+                "user_id": user['id'],
+                "chat_id": item.chat_id,
+                'username': item.username,
+                'success' : True}
+    except:
+        return {
+            "success" : False,
+            "message" : "An error has occured, please try again."
+        }
+        
+        
     
 
 
