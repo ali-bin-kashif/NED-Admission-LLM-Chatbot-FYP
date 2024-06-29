@@ -52,7 +52,7 @@ async def final_result(item: models.validation):
 @app.post("/load_create_chat")
 async def sign_in(item: models.ChatInfo):
 
-    user = auth.get_user_from_db(item.username)
+    user = auth.get_current_user(item.access_token)
     # global user_chat_details
     chatbot.user_chat_details = {
         'user_id' : user['id'],

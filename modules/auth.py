@@ -21,7 +21,7 @@ ALGORITHM = "HS256"
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-def create_access_token(data: dict, expires_delta: timedelta = timedelta(minutes=60)):
+def create_access_token(data: dict, expires_delta: timedelta = timedelta(minutes=2880)):
     to_encode = data.copy()
     expire = datetime.utcnow() + expires_delta
     to_encode.update({"exp": expire})

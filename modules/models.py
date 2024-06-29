@@ -19,5 +19,5 @@ class Token(BaseModel):
     token_type: str
 
 class ChatInfo(BaseModel):
-    username: str
+    access_token: str
     chat_id: int
