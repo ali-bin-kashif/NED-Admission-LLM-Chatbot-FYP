@@ -12,3 +12,7 @@ requests
 langchain_groq
 mysql-connector-python
 PyJWT
+langchain-openai
+pinecone-client
+langchain-pinecone
+pinecone-notebooks
