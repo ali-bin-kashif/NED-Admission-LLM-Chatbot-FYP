@@ -22,5 +22,5 @@ class ChatInfo(BaseModel):
     chat_id: int
     
 class LoginInfo(BaseModel):
-    email: str
+    username: str
     password: str

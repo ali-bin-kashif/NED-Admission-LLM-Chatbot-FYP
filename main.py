@@ -27,7 +27,7 @@ def register(user: models.User):
 @app.post("/login", response_model=models.Token)
 
 def login_for_access_token(login_data: models.LoginInfo):
-    user = auth.authenticate_user(login_data.email, login_data.password)
+    user = auth.authenticate_user(login_data.username, login_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
