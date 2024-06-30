@@ -36,7 +36,8 @@ def login_for_access_token(login_data: models.LoginInfo):
         )
     print(user)
     access_token = auth.create_access_token(data={"sub": user["username"]})
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"access_token": access_token, "token_type": "bearer",
+            "username" : user["username"], "email" : user["email"]}
 
 @app.get("/users/me", response_model=models.User)
 def read_users_me(current_user: models.User = Depends(auth.get_current_user)):
