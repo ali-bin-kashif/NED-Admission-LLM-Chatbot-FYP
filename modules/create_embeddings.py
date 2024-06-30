@@ -3,7 +3,6 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores.faiss import FAISS
-# from langchain_community.vectorstores.pinecone import Pinecone
 from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader
 from langchain_community.document_loaders import WebBaseLoader
 import google.generativeai as genai

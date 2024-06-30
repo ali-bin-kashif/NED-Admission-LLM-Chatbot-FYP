@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends,Header, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from modules import models
 from modules import chatbot_functions as chatbot
@@ -44,46 +44,68 @@ def read_users_me(current_user: models.User = Depends(auth.get_current_user)):
 
 # API endpoint (POST Request)
 @app.post("/llm_on_cpu")
-async def final_result(item: models.validation):
+async def final_result(item: models.validation, authorization: str = Header(None)):
+
+        if authorization is None or not authorization.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail="Authorization header missing or invalid")
+
+        access_token = authorization.split("Bearer ")[1]
+        print(access_token)
+        user = auth.get_current_user(access_token)
+        
+        if not user:
+            raise HTTPException(status_code=404, detail="User Not found")
+        
         print(chatbot.chat_history)
         response = chatbot.user_input(item.prompt)
         return response
+        
     
-@app.post("/load_create_chat")
-async def sign_in(item: models.ChatInfo):
+def get_authorization_header(authorization: str = Header(None)):
+    if authorization is None or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authorization header missing or invalid")
+    return authorization.split("Bearer ")[1]
 
-    user = auth.get_current_user(item.access_token)
+@app.post("/load_create_chat")
+async def sign_in(item: models.ChatInfo, access_token: str = Depends(get_authorization_header)):
+    print(access_token)
+
+    user = auth.get_current_user(access_token)
     # global user_chat_details
     chatbot.user_chat_details = {
-        'user_id' : user['id'],
-        'chat_id' : item.chat_id
+        'user_id': user['id'],
+        'chat_id': item.chat_id
     }
     
     print(chatbot.user_chat_details)
     
-    
     try:
         chat_exist = chatbot.chat_obj.does_chat_exist(chatbot.user_chat_details)
         print(chat_exist)
-        if(chat_exist):
+        if chat_exist:
             chatbot.fetch_chat_history()
-            return {"message": "Chat history fetched successfully",
+            return {
+                "message": "Chat history fetched successfully",
                 "user_id": user['id'],
                 "chat_id": item.chat_id,
-                'username': item.username,
-                'success' : True}
+                'username': user['username'],
+                'success': True
+            }
         else:
-            chatbot.chat_history=[]
-            print(chatbot.chat_history)
-            return {"message": "Chat created successfully",
+            chatbot.chat_history = []
+            print(chatbot.chat_history, 'hi')
+            return {
+                "message": "Chat created successfully",
                 "user_id": user['id'],
                 "chat_id": item.chat_id,
-                'username': item.username,
-                'success' : True}
-    except:
+                'username': user['username'],
+                'success': True
+            }
+    except Exception as e:
+        print(f"Error: {e}")
         return {
-            "success" : False,
-            "message" : "An error has occured, please try again."
+            "success": False,
+            "message": "An error has occurred, please try again."
         }
         
         
