@@ -20,3 +20,7 @@ class Token(BaseModel):
 
 class ChatInfo(BaseModel):
     chat_id: int
+    
+class LoginInfo(BaseModel):
+    email: str
+    password: str

@@ -24,9 +24,10 @@ def register(user: models.User):
     auth.create_user_in_db(user.username, user.email, user.password)
     return user
 
-@app.post("/token", response_model=models.Token)
-def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = auth.authenticate_user(form_data.username, form_data.password)
+@app.post("/login", response_model=models.Token)
+
+def login_for_access_token(login_data: models.LoginInfo):
+    user = auth.authenticate_user(login_data.username, login_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
