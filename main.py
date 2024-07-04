@@ -24,8 +24,8 @@ def register(user: models.User):
         auth.create_user_in_db(user.username, user.email, user.password)
         return {"success":True,
                 "detail" : "User registered successfully.",
-                "username": user["username"],
-                "email": user["email"]}
+                "username": user.username,
+                "email": user.email}
         
 
 @app.post("/login")
