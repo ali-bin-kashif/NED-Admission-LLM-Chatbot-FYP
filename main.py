@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends,Header, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.middleware.cors import CORSMiddleware
 from modules import models
 from modules import chatbot_functions as chatbot
 from mysql.connector import Error
@@ -9,8 +10,17 @@ from mysql.connector import Error
 
 from modules import auth
 
-#Fast API
+#Fast API object
 app = FastAPI()
+
+# Configuring FastAPI CORS (Cross-Origin Resource Sharing)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Authorization Endpoints
 @app.post("/register")
@@ -29,7 +39,6 @@ def register(user: models.User):
         
 
 @app.post("/login")
-
 def login_for_access_token(login_data: models.LoginInfo):
     
         user = auth.authenticate_user(login_data.username, login_data.password)
