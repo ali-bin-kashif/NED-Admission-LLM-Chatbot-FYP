@@ -102,14 +102,19 @@ async def sign_in(item: models.ChatInfo, access_token: str = Depends(get_authori
     try:
         chat_exist = chatbot.chat_obj.does_chat_exist(chatbot.user_chat_details)
         print(chat_exist)
+        
+       
+        
         if chat_exist:
             chatbot.fetch_chat_history()
+            chat_conversation = chatbot.convert_to_array_of_dicts(chatbot.chat_history)
             return {
+                'success': True,
                 "message": "Chat history fetched successfully",
                 "user_id": user['id'],
                 "chat_id": item.chat_id,
                 'username': user['username'],
-                'success': True
+                "chat_history" : chat_conversation
             }
         else:
             chatbot.chat_history = []

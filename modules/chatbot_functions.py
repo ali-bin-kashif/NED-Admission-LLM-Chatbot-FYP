@@ -51,6 +51,19 @@ def fetch_chat_history():
     global chat_history
     chat_history = chat_obj.fetch_chat_data(user_chat_details)
     print(chat_history)
+    
+    
+def convert_to_array_of_dicts(chat_history):
+    chat_array = []
+    
+    for i in range(0, len(chat_history), 2):
+        human_message = chat_history[i]
+        chatbot_message = chat_history[i + 1] if i + 1 < len(chat_history) else ""
+        
+        chat_dict = {"Human": human_message, "Chatbot": chatbot_message}
+        chat_array.append(chat_dict)
+    
+    return chat_array
 
 def load_llm():
     """
