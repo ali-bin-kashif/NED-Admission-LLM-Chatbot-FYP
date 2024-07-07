@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends,Header, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm, HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.middleware.cors import CORSMiddleware
 from modules import models
 from modules import chatbot_functions as chatbot
@@ -12,6 +12,8 @@ from modules import auth
 
 #Fast API object
 app = FastAPI()
+
+auth_scheme = HTTPBearer()
 
 # Configuring FastAPI CORS (Cross-Origin Resource Sharing)
 app.add_middleware(
@@ -41,7 +43,7 @@ def register(user: models.User):
 @app.post("/login")
 def login_for_access_token(login_data: models.LoginInfo):
     
-        user = auth.authenticate_user(login_data.username, login_data.password)
+        user = auth.authenticate_user(login_data.email, login_data.password)
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -58,18 +60,20 @@ def login_for_access_token(login_data: models.LoginInfo):
         
 
 @app.get("/users/me", response_model=models.User)
-def read_users_me(current_user: models.User = Depends(auth.get_current_user)):
+def read_users_me(authorization: HTTPAuthorizationCredentials = Depends(auth_scheme)):
+    current_user = auth.get_current_user(authorization.credentials)
     return current_user
 
 
 # API endpoint (POST Request)
 @app.post("/llm_on_cpu")
-def final_result(item: models.validation, authorization: str = Header(None)):
-
-    if authorization is None or not authorization.startswith("Bearer "):
+def final_result(item: models.validation, authorization: HTTPAuthorizationCredentials = Depends(auth_scheme)):
+    print(authorization.credentials)
+    
+    access_token = authorization.credentials
+    if authorization is None:
         raise HTTPException(status_code=401, detail="Authorization header missing or invalid")
 
-    access_token = authorization.split("Bearer ")[1]
     print(access_token)
     user = auth.get_current_user(access_token)
         
@@ -81,16 +85,17 @@ def final_result(item: models.validation, authorization: str = Header(None)):
     return response
         
     
-def get_authorization_header(authorization: str = Header(None)):
-    if authorization is None or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail={"success":False ,"message":"Authorization header missing or invalid"})
-    return authorization.split("Bearer ")[1]
 
 @app.post("/load_create_chat")
-async def sign_in(item: models.ChatInfo, access_token: str = Depends(get_authorization_header)):
-    print(access_token)
+async def sign_in(item: models.ChatInfo, authorization: HTTPAuthorizationCredentials = Depends(auth_scheme)):
+    print(authorization.credentials)
+    print(authorization)
+    token = authorization.credentials
+    
+    if authorization is None:
+        raise HTTPException(status_code=401, detail="Authorization header missing or invalid")
 
-    user = auth.get_current_user(access_token)
+    user = auth.get_current_user(token)
     # global user_chat_details
     chatbot.user_chat_details = {
         'user_id': user['id'],

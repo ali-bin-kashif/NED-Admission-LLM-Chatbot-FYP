@@ -7,7 +7,7 @@ class validation(BaseModel):
     
 class user_authentication(BaseModel):
     user_id: int
-    chat_id: int
+    chat_id: str
     
 class User(BaseModel):
     username: str
@@ -19,8 +19,8 @@ class Token(BaseModel):
     token_type: str
 
 class ChatInfo(BaseModel):
-    chat_id: int
+    chat_id: str
     
 class LoginInfo(BaseModel):
-    username: str
+    email: str
     password: str

@@ -45,6 +45,24 @@ def get_user_from_db(username: str):
     except Error as e:
         print(f"Error connecting to MySQL: {e}")
         return None
+    
+def get_user_from_db_email(email: str):
+    try:
+        connection = mysql.connector.connect(
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_NAME
+        )
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+        user = cursor.fetchone()
+        cursor.close()
+        connection.close()
+        return user
+    except Error as e:
+        print(f"Error connecting to MySQL: {e}")
+        return None
 
 def create_user_in_db(username: str, email: str, password: str):
     try:
@@ -57,13 +75,14 @@ def create_user_in_db(username: str, email: str, password: str):
         cursor = connection.cursor()
         cursor.execute("INSERT INTO users (username, email, password) VALUES (%s, %s, %s)", (username, email, password))
         connection.commit()
+        print(f'User Registered: {username}, {email} ')
         cursor.close()
         connection.close()
     except Error as e:
         print(f"Error connecting to MySQL: {e}")
 
-def authenticate_user(username: str, password: str):
-    user = get_user_from_db(username)
+def authenticate_user(email: str, password: str):
+    user = get_user_from_db_email(email)
     if not user or user["password"] != password:
         return False
     return user
