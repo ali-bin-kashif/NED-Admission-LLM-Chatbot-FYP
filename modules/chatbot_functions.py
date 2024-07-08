@@ -54,6 +54,9 @@ def fetch_chat_history():
     
     
 def convert_to_array_of_dicts(chat_history):
+    """
+    Function for converting array of chat history into dictionary with Human and Chatbot as keys and chat as value.
+    """
     chat_array = []
     
     for i in range(0, len(chat_history), 2):
