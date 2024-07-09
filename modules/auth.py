@@ -123,6 +123,7 @@ def create_user_in_db(username: str, email: str, password: str):
         connection.close()
     except Error as e:
         print(f"Error connecting to MySQL: {e}")
+        return e
 
 def authenticate_user(email: str, password: str):
     """

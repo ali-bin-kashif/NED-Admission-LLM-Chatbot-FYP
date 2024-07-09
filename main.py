@@ -38,19 +38,22 @@ def register(user: models.User):
             )
         # Create a new user in the database
         response = auth.create_user_in_db(user.username, user.email, user.password)
-        
-        if not response:
-            return{
-                "success": False,
-                "detail": "Username or email already exist."
-            }
- 
-        return {
+        print(response)
+        if response is None:
+            return {
             "success": True,
             "detail": "User registered successfully.",
             "username": user.username,
             "email": user.email
-        }
+            }
+        else:
+            return{
+                "success": False,
+                "detail": "Username or email already exist.",
+                "error" : response
+            }
+ 
+        
     except HTTPException as http_exc:
         # Handle specific HTTP exceptions
         raise http_exc
