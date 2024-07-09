@@ -37,7 +37,14 @@ def register(user: models.User):
                 detail={"success": False, "message": "Username already registered"},
             )
         # Create a new user in the database
-        auth.create_user_in_db(user.username, user.email, user.password)
+        response = auth.create_user_in_db(user.username, user.email, user.password)
+        
+        if not response:
+            return{
+                "success": False,
+                "detail": "Username or email already exist."
+            }
+ 
         return {
             "success": True,
             "detail": "User registered successfully.",
