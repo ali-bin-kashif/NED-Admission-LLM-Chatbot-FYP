@@ -29,21 +29,36 @@ def register(user: models.User):
     """
     Endpoint for user registration.
     """
-    existing_user = auth.get_user_from_db(user.username)
-    if existing_user:  # Check if the username is already registered
+    try:
+        existing_user = auth.get_user_from_db(user.username)
+        if existing_user:  # Check if the username is already registered
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"success": False, "message": "Username already registered"},
+            )
+        # Create a new user in the database
+        auth.create_user_in_db(user.username, user.email, user.password)
+        return {
+            "success": True,
+            "detail": "User registered successfully.",
+            "username": user.username,
+            "email": user.email
+        }
+    except HTTPException as http_exc:
+        # Handle specific HTTP exceptions
+        raise http_exc
+    except (auth.DatabaseError, auth.ValidationError) as db_exc:
+        # Handle known errors from the auth module
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"success": False, "message": "Username already registered"},
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"success": False, "message": str(db_exc)},
         )
-    # Create a new user in the database
-    auth.create_user_in_db(user.username, user.email, user.password)
-    return {
-        "success": True,
-        "detail": "User registered successfully.",
-        "username": user.username,
-        "email": user.email
-    }
-
+    except Exception as exc:
+        # Catch all other exceptions
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"success": False, "message": "An unexpected error occurred"},
+        )
 
 
 @app.post("/login")
