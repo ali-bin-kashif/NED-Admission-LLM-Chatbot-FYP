@@ -1,168 +1,214 @@
-import os
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from datetime import datetime, timedelta
-import jwt
 import mysql.connector
 from mysql.connector import Error
+import json
+import os
 
-# Fetching database credentials from environment variables
-DB_HOST = os.getenv('DATABASE_HOST')
-DB_PASSWORD = os.getenv('DATABASE_PW')
-DB_USER = os.getenv('DATABASE_USER')
-DB_NAME = os.getenv('DATABASE')
+# Fetching credentials from environment variables
+host = os.getenv('DATABASE_HOST')
+db_pass = os.getenv('DATABASE_PW')
+db_user = os.getenv('DATABASE_USER')
+db = os.getenv('DATABASE')
 
-# Secret key to encode and decode JWT tokens
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = "HS256"
-
-# OAuth2 password flow for obtaining the token
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-
-def create_access_token(data: dict, expires_delta: timedelta = timedelta(minutes=2880)):
+class ChatDatabase:
     """
-    Creates a JWT token with the given data and expiration delta.
+    A class used to interact with the chat database.
 
-    Args:
-        data (dict): Data to be encoded in the token.
-        expires_delta (timedelta, optional): Expiration time delta for the token. Defaults to 2880 minutes.
-
-    Returns:
-        str: Encoded JWT token.
+    Attributes:
+        host (str): Database host.
+        user (str): Database user.
+        password (str): Database password.
+        database (str): Database name.
     """
-    to_encode = data.copy()
-    expire = datetime.utcnow() + expires_delta
-    to_encode.update({"exp": expire})  # Add expiration time to the token
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)  # Encode the JWT
-    return encoded_jwt
 
+    def __init__(self, host: str, user: str, password: str, database: str):
+        """
+        Initializes the ChatDatabase with connection parameters.
 
-def get_user_from_db(username: str):
-    """
-    Retrieves a user from the database by username.
+        Args:
+            host (str): Database host.
+            user (str): Database user.
+            password (str): Database password.
+            database (str): Database name.
+        """
+        self.host = host
+        self.user = user
+        self.password = password
+        self.database = database
 
-    Args:
-        username (str): Username to search for.
+    def create_connection(self):
+        """
+        Creates and returns a database connection.
 
-    Returns:
-        dict: User record if found, else None.
-    """
-    try:
-        connection = mysql.connector.connect(
-            host=DB_HOST,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            database=DB_NAME
-        )
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))  # Query to fetch user by username
-        user = cursor.fetchone()
-        cursor.close()
-        connection.close()
-        return user
-    except Error as e:
-        print(f"Error connecting to MySQL: {e}")
-        return None
-    
+        Returns:
+            mysql.connector.connection_cext.CMySQLConnection: Database connection object if successful, None otherwise.
+        """
+        try:
+            connection = mysql.connector.connect(
+                host=self.host,
+                user=self.user,
+                password=self.password,
+                database=self.database
+            )
+            if connection.is_connected():
+                return connection
+        except Error as e:
+            print(f"Error: {e}")
+            return None
 
-def get_user_from_db_email(email: str):
-    """
-    Retrieves a user from the database by email.
+    def create_new_chat(self, user_id: int, chat_id: int, chat_history: list):
+        """
+        Creates a new chat in the database.
 
-    Args:
-        email (str): Email to search for.
+        Args:
+            user_id (int): ID of the user.
+            chat_id (int): ID of the chat.
+            chat_history (list): History of the chat messages.
+        """
+        insert_query = """
+        INSERT INTO chats (user_id, chat_id, chat_history)
+        VALUES (%s, %s, %s)
+        """
+        chat_dict = {'chat_history': chat_history}
+        chat_history_json = json.dumps(chat_dict)
+        values = (user_id, chat_id, chat_history_json)
+        
+        connection = self.create_connection()
+        if connection:
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute(insert_query, values)
+                    connection.commit()
+                    print("Chat created successfully")
+            except Error as e:
+                print(f"Error: {e}")
+            finally:
+                connection.close()
+                print("Connection closed")
 
-    Returns:
-        dict: User record if found, else None.
-    """
-    try:
-        connection = mysql.connector.connect(
-            host=DB_HOST,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            database=DB_NAME
-        )
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM users WHERE email = %s", (email,))  # Query to fetch user by email
-        user = cursor.fetchone()
-        cursor.close()
-        connection.close()
-        return user
-    except Error as e:
-        print(f"Error connecting to MySQL: {e}")
-        return None
+    def update_existing_chat(self, user_id: int, chat_id: int, chat_history: list):
+        """
+        Updates an existing chat in the database.
 
+        Args:
+            user_id (int): ID of the user.
+            chat_id (int): ID of the chat.
+            chat_history (list): Updated history of the chat messages.
+        """
+        update_query = """
+        UPDATE chats
+        SET chat_history = %s
+        WHERE user_id = %s AND chat_id = %s
+        """
+        chat_dict = {'chat_history': chat_history}
+        chat_history_json = json.dumps(chat_dict)
+        values = (chat_history_json, user_id, chat_id)
+        
+        connection = self.create_connection()
+        if connection:
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute(update_query, values)
+                    connection.commit()
+                    print("Chat updated successfully")
+            except Error as e:
+                print(f"Error: {e}")
+            finally:
+                connection.close()
+                print("Connection closed")
 
-def create_user_in_db(username: str, email: str, password: str):
-    """
-    Creates a new user in the database.
+    def delete_chat(self, user_id: int, chat_id: int):
+        """
+        Deletes a chat from the database.
 
-    Args:
-        username (str): Username for the new user.
-        email (str): Email for the new user.
-        password (str): Password for the new user.
-    """
-    try:
-        connection = mysql.connector.connect(
-            host=DB_HOST,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            database=DB_NAME
-        )
-        cursor = connection.cursor()
-        cursor.execute("INSERT INTO users (username, email, password) VALUES (%s, %s, %s)", (username, email, password))  # Insert new user
-        connection.commit()
-        print(f'User Registered: {username}, {email}')
-        cursor.close()
-        connection.close()
-    except Error as e:
-        print(f"Error connecting to MySQL: {e}")
+        Args:
+            user_id (int): ID of the user.
+            chat_id (int): ID of the chat.
+        """
+        delete_query = """
+        DELETE FROM chats
+        WHERE user_id = %s AND chat_id = %s
+        """
+        values = (user_id, chat_id)
+        
+        connection = self.create_connection()
+        if connection:
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute(delete_query, values)
+                    connection.commit()
+                    print("Chat deleted successfully")
+            except Error as e:
+                print(f"Error: {e}")
+            finally:
+                connection.close()
+                print("Connection closed")
 
+    def does_chat_exist(self, user_chat_ids: dict) -> bool:
+        """
+        Checks if a chat exists in the database.
 
-def authenticate_user(email: str, password: str):
-    """
-    Authenticates a user by email and password.
+        Args:
+            user_chat_ids (dict): Dictionary containing 'user_id' and 'chat_id'.
 
-    Args:
-        email (str): User's email.
-        password (str): User's password.
+        Returns:
+            bool: True if chat exists, False otherwise.
+        """
+        fetch_query = """
+        SELECT chat_history
+        FROM chats
+        WHERE user_id = %s AND chat_id = %s
+        """
+        values = (user_chat_ids['user_id'], user_chat_ids['chat_id'])
+        
+        connection = self.create_connection()
+        if connection:
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute(fetch_query, values)
+                    result = cursor.fetchone()
+                    return result is not None
+            except Error as e:
+                print(f"Error: {e}")
+                return False
+            finally:
+                connection.close()
+                print("Connection closed")
 
-    Returns:
-        dict: User record if authentication is successful, False otherwise.
-    """
-    user = get_user_from_db_email(email)
-    if not user or user["password"] != password:  # Check if user exists and password matches
-        return False
-    return user
+    def fetch_chat_data(self, user_chat_ids: dict) -> list:
+        """
+        Fetches chat history from the database.
 
+        Args:
+            user_chat_ids (dict): Dictionary containing 'user_id' and 'chat_id'.
 
-def get_current_user(token: str = Depends(oauth2_scheme)):
-    """
-    Gets the current user based on the JWT token.
+        Returns:
+            list: Chat history if found, empty list otherwise.
+        """
+        fetch_query = """
+        SELECT chat_history
+        FROM chats
+        WHERE user_id = %s AND chat_id = %s
+        """
+        values = (user_chat_ids['user_id'], user_chat_ids['chat_id'])
+        
+        connection = self.create_connection()
+        if connection:
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute(fetch_query, values)
+                    chat = cursor.fetchone()
+                    if chat:
+                        chat_json = chat[0]
+                        chat_dict = json.loads(chat_json)
+                        return chat_dict['chat_history']
+                    else:
+                        return []
+            except Error as e:
+                print(f"Error: {e}")
+                return []
+            finally:
+                connection.close()
+                print("Connection closed")
 
-    Args:
-        token (str): JWT token.
-
-    Returns:
-        dict: User record.
-
-    Raises:
-        HTTPException: If the token is invalid or user is not found.
-    """
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])  # Decode the JWT token
-        username: str = payload.get("sub")
-        if username is None:  # Check if username is present in the payload
-            raise credentials_exception
-    except jwt.PyJWTError:
-        raise credentials_exception
-    user = get_user_from_db(username)  # Fetch the user from the database
-    if user is None:  # Check if user exists
-        raise credentials_exception
-    return user
+if __name__ == "__main__":
+    chat = ChatDatabase(host, db_user, db_pass, db)
