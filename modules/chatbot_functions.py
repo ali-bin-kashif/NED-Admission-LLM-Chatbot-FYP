@@ -55,7 +55,7 @@ def fetch_chat_history():
     
 def convert_to_array_of_dicts(chat_history):
     """
-    Function for converting array of chat history into dictionary with Human and Chatbot as keys and chat as value.
+    Function for converting array of chat history into dictionary with role as keys (Human and Chatbot) and content as value.
     """
     chat_array = []
     
@@ -63,8 +63,9 @@ def convert_to_array_of_dicts(chat_history):
         human_message = chat_history[i]
         chatbot_message = chat_history[i + 1] if i + 1 < len(chat_history) else ""
         
-        chat_dict = {"Human": human_message, "Chatbot": chatbot_message}
-        chat_array.append(chat_dict)
+        chat_array.append({"role": "human", "content": human_message})
+        if chatbot_message:
+            chat_array.append({"role": "chatbot", "content": chatbot_message})
     
     return chat_array
 
@@ -144,10 +145,12 @@ def get_conversational_chain(history_aware_retriever, llm):
         ]
     )
 
-    question_answer_chain = create_stuff_documents_chain(llm, qa_prompt)
+    question_answer_chain = create_stuff_documents_chain(llm, qa_prompt, verbose=False)
     rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
     
     return rag_chain
+
+    
 
 def user_input(user_question):
     """

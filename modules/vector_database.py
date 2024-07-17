@@ -117,7 +117,26 @@ def delete_all_embeddings():
     """
     Deletes all embeddings from the Pinecone index.
     """
-    index.delete(delete_all=True, namespace="")
+    status = index.delete(delete_all=True, namespace="")
+    
+    if status is not None:
+        print("Deleted!")
+    
+def delete_file_embeddings(file_name: str):
+    """
+    Deletes a file embeddings from the Pinecone index with meta-data filtering.
+    """
+    status = index.delete(
+        filter={
+            "filename" : file_name
+        }
+    )
+    
+    if status == {}:
+        print("Embeddings of file:" + file_name + " deleted successfully!")
+    else:
+        print(file_name + ": File not found")
+    
 
 def add_docs(documents):
     """
@@ -133,10 +152,17 @@ def add_docs(documents):
     
     # Initialize Pinecone vector store and add documents
     vectorstore = PineconeVectorStore(embedding=embeddings, index_name="langchain-ned-data")
-    vectorstore.add_documents(texts)
-
+    vectors = vectorstore.add_documents(texts)
+    
+    if vectors is not None:
+        print('Vectors Embeddings created successfully!')
+    else:
+        print('Failed creating embeddings!')
+    
+    
 if __name__ == "__main__":
     # Uncomment the following lines to execute the desired functions
     # create_vector_db()
     # delete_all_embeddings()
     add_docs()
+    

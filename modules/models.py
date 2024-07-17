@@ -24,3 +24,6 @@ class ChatInfo(BaseModel):
 class LoginInfo(BaseModel):
     email: str
     password: str
+    
+class FileName(BaseModel):
+    file_name: str

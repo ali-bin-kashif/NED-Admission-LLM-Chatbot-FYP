@@ -1,13 +1,20 @@
-from fastapi import FastAPI, Depends, Header, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm, HTTPAuthorizationCredentials, HTTPBearer
+from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.middleware.cors import CORSMiddleware
+
 from modules import models
 from modules import chatbot_functions as chatbot
 from modules import auth
-from mysql.connector import Error
+from routers import vectordb_s3_endpoints
 
 # FastAPI object
-app = FastAPI()
+app = FastAPI(
+    title="FYP RAG Chatbot FastAPI",
+    summary="This is the backend of our final year project of university, which a chatbot for university admissions using LLM and RAG. The bot is powered by Langchain and FastAPI. The UI and frontend is developed in Next.js."
+)
+
+# Include vectordb and AWS S3 Buckets router
+app.include_router(vectordb_s3_endpoints.router)
 
 # Bearer token authentication scheme
 auth_scheme = HTTPBearer()
@@ -168,3 +175,7 @@ async def sign_in(item: models.ChatInfo, authorization: HTTPAuthorizationCredent
             "message": "An error has occurred, please try again.",
             "Error": str(e)
         }
+
+
+# Admin Panel Endpoints
+
