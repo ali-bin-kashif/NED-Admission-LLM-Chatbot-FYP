@@ -19,11 +19,11 @@ DB_FAISS_PATH = 'vectorstore/db_faiss'
 
 # Load environment variables
 load_dotenv()
-google_api_key = os.getenv("GOOGLE_API_KEY")
+# google_api_key = os.getenv("GOOGLE_API_KEY")
 pinecone_api_key = os.getenv("PINECONE_API_KEY")
 
 # Configure Google Gemini API
-genai.configure(api_key=google_api_key)
+# genai.configure(api_key=google_api_key)
 
 # Print Pinecone API key for verification
 print(pinecone_api_key)
