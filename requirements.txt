@@ -18,3 +18,5 @@ langchain-pinecone
 pinecone-notebooks
 fitz
 frontend
+boto3
+botocore
