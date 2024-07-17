@@ -17,3 +17,4 @@ pinecone-client
 langchain-pinecone
 pinecone-notebooks
 fitz
+frontend
