@@ -16,3 +16,4 @@ langchain-openai
 pinecone-client
 langchain-pinecone
 pinecone-notebooks
+fitz
