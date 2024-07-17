@@ -16,7 +16,7 @@ langchain-openai
 pinecone-client
 langchain-pinecone
 pinecone-notebooks
-fitz
+PyMuPDF
 frontend
 boto3
 botocore

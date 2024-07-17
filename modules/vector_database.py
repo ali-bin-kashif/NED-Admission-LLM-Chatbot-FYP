@@ -4,7 +4,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores.faiss import FAISS
 from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader
 from langchain_community.document_loaders import WebBaseLoader
-import google.generativeai as genai
+# import google.generativeai as genai
 
 from langchain_pinecone import PineconeVectorStore
 from pinecone import Pinecone
