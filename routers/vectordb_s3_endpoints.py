@@ -79,7 +79,7 @@ async def upload_files(files: Annotated[list[UploadFile], File()]):
     return {"file_urls": file_urls, "message": "Files uploaded to S3 successfully"}
 
 @router.post("/extract-and-store-sites/")
-async def extract_and_store_webpages(urls: list = Body()):
+async def extract_and_store_webpages(urls: models.webURLS):
     """
     Extracts content from a list of URLs and stores them in the vector database.
 
@@ -89,6 +89,8 @@ async def extract_and_store_webpages(urls: list = Body()):
     Returns:
     - dict: A dictionary containing a message indicating success.
     """
+    urls = urls.urls
+    print(urls)
     try:
         docs = []
         for url in urls:

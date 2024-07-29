@@ -1,10 +1,11 @@
 from pydantic import BaseModel
+from typing import Optional
 
 #Pydantic objects
 
 class validation(BaseModel):
     prompt: str
-    
+    chat_id: str
 class user_authentication(BaseModel):
     user_id: int
     chat_id: str
@@ -27,3 +28,6 @@ class LoginInfo(BaseModel):
     
 class FileName(BaseModel):
     file_name: str
+
+class webURLS(BaseModel):
+    urls : list

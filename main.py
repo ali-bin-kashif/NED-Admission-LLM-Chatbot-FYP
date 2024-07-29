@@ -7,6 +7,8 @@ from modules import chatbot_functions as chatbot
 from modules import auth
 from routers import vectordb_s3_endpoints
 
+
+
 # FastAPI object
 app = FastAPI(
     title="FYP RAG Chatbot FastAPI",
@@ -28,6 +30,8 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
+
+is_chat_created = False
 
 # Authorization Endpoints
 
@@ -83,7 +87,9 @@ def login_for_access_token(login_data: models.LoginInfo):
     """
     Endpoint for user login. Returns an access token if credentials are valid.
     """
+    is_chat_created = False
     user = auth.authenticate_user(login_data.email, login_data.password)
+    print(user)
     if not user:  # Check if the user credentials are valid
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -115,10 +121,11 @@ def read_users_me(authorization: HTTPAuthorizationCredentials = Depends(auth_sch
 # API endpoint (POST Request)
 
 @app.post("/llm_on_cpu")
-def final_result(item: models.validation, authorization: HTTPAuthorizationCredentials = Depends(auth_scheme)):
+async def final_result(item: models.validation, authorization: HTTPAuthorizationCredentials = Depends(auth_scheme)):
     """
     Endpoint to process user input through a chatbot and return the response.
     """
+    global is_chat_created
     access_token = authorization.credentials
     if authorization is None:  # Check if the authorization header is missing or invalid
         raise HTTPException(status_code=401, detail="Authorization header missing or invalid")
@@ -127,16 +134,28 @@ def final_result(item: models.validation, authorization: HTTPAuthorizationCreden
     if not user:  # Check if the user is found
         raise HTTPException(status_code=404, detail="User Not found")
     
-    response = chatbot.user_input(item.prompt)  # Process the user input through the chatbot
+    if not is_chat_created:
+        chatbot.user_chat_details = {
+        'user_id': user['id'],
+        'chat_id': item.chat_id
+        }
+
+        chatbot.chat_history = []
+        is_chat_created = True
+
+
+
+    response = await chatbot.user_input(item.prompt)  # Process the user input through the chatbot
     return response
 
 
 
 @app.post("/load_create_chat")
-async def sign_in(item: models.ChatInfo, authorization: HTTPAuthorizationCredentials = Depends(auth_scheme)):
+async def load_chat(item: models.ChatInfo, authorization: HTTPAuthorizationCredentials = Depends(auth_scheme)):
     """
     Endpoint to load or create a chat and fetch chat history if it exists.
     """
+    global is_chat_created
     token = authorization.credentials
     if authorization is None:  # Check if the authorization header is missing or invalid
         raise HTTPException(status_code=401, detail="Authorization header missing or invalid")
@@ -146,12 +165,14 @@ async def sign_in(item: models.ChatInfo, authorization: HTTPAuthorizationCredent
         'user_id': user['id'],
         'chat_id': item.chat_id
     }
-
+    
     try:
+        is_chat_created = True
         chat_exist = chatbot.chat_obj.does_chat_exist(chatbot.user_chat_details)  # Check if the chat exists
         if chat_exist:
             chatbot.fetch_chat_history()  # Fetch the chat history
             chat_conversation = chatbot.convert_to_array_of_dicts(chatbot.chat_history)  # Convert chat history to array of dicts
+
             return {
                 'success': True,
                 "message": "Chat history fetched successfully",
@@ -161,7 +182,8 @@ async def sign_in(item: models.ChatInfo, authorization: HTTPAuthorizationCredent
                 "chat_history": chat_conversation
             }
         else:
-            chatbot.chat_history = []  # Initialize an empty chat history
+            chatbot.chat_history = [] # Initialize an empty chat history
+            print(chatbot.chat_history) 
             return {
                 "message": "Chat created successfully",
                 "user_id": user['id'],

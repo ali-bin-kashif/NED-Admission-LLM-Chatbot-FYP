@@ -212,3 +212,4 @@ class ChatDatabase:
 
 if __name__ == "__main__":
     chat = ChatDatabase(host, db_user, db_pass, db)
+    print(chat.host)

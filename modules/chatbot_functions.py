@@ -18,6 +18,8 @@ from langchain_pinecone import PineconeVectorStore
 
 from pinecone import Pinecone
 
+import asyncio
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -151,12 +153,28 @@ def get_conversational_chain(history_aware_retriever, llm):
     
     return rag_chain
 
+async def update_chat_history(user_question, answer):
+    chat_history.extend([user_question, answer])
+    print(chat_history)
     
+    # Check and update the database asynchronously, if applicable
+    if chat_obj.does_chat_exist(user_chat_details):
+        chat_obj.update_existing_chat(
+            user_chat_details['user_id'],
+            user_chat_details['chat_id'],
+            chat_history
+        )
+    else:
+        chat_obj.create_new_chat(
+            user_chat_details['user_id'],
+            user_chat_details['chat_id'],
+            chat_history
+        )
 
-def user_input(user_question):
+async def user_input(user_question):
     """
-    Processes the user input, retrieves vector embeddings, generate response,
-    and updates the chat history.
+    Asynchronously processes the user input, retrieves vector embeddings, generate response,
+    and updates the chat history asynchronously.
     
     Args:
         user_question (str): The question input by the user.
@@ -164,21 +182,11 @@ def user_input(user_question):
     Returns:
         response: The response from the language model.
     """
-    # Set Google embeddings
-    # embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-    
     # Set OPEN AI embeddings
     embeddings = OpenAIEmbeddings(model='text-embedding-3-large')
     
-    # # Load saved vectors from the local path
-    # pc = Pinecone(pinecone_api_key)
-    
-    # index = pc.Index('langchain-ned-data')
-    
-    # index.query()
-    # db = FAISS.load_local(DB_FAISS_PATH, embeddings, allow_dangerous_deserialization=True)
-    
-    db = PineconeVectorStore(index_name = "langchain-ned-data", embedding = embeddings)
+    # Asynchronously create the vector store and retriever
+    db = PineconeVectorStore(index_name="langchain-ned-data", embedding=embeddings)
     retriever = db.as_retriever()
     
     # Load the language model
@@ -190,25 +198,70 @@ def user_input(user_question):
     # Set up the conversational QA chain
     rag_chain = get_conversational_chain(history_retriever, llm)
     
-    # Invoke the chain with user input and chat history
+    # Asynchronously invoke the chain with user input and chat history
     response = rag_chain.invoke({"input": user_question, "chat_history": chat_history})
     
-    # Update chat history
-    # chat_history.extend([user_question, response["answer"]])
-    # print(chat_history)
-    
-    # # Check if chat exists in the database and update or create new chat accordingly
-    # if chat_obj.does_chat_exist(user_chat_details):
-    #     chat_obj.update_existing_chat(
-    #         user_chat_details['user_id'],
-    #         user_chat_details['chat_id'],
-    #         chat_history
-    #     )
-    # else:
-    #     chat_obj.create_new_chat(
-    #         user_chat_details['user_id'],
-    #         user_chat_details['chat_id'],
-    #         chat_history
-    #     )
+    # Asynchronously update chat history
+    asyncio.create_task(update_chat_history(user_question, response["answer"]))
     
     return response
+
+# def user_input(user_question):
+#     """
+#     Processes the user input, retrieves vector embeddings, generate response,
+#     and updates the chat history.
+    
+#     Args:
+#         user_question (str): The question input by the user.
+    
+#     Returns:
+#         response: The response from the language model.
+#     """
+#     # Set Google embeddings
+#     # embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+    
+#     # Set OPEN AI embeddings
+#     embeddings = OpenAIEmbeddings(model='text-embedding-3-large')
+    
+#     # # Load saved vectors from the local path
+#     # pc = Pinecone(pinecone_api_key)
+    
+#     # index = pc.Index('langchain-ned-data')
+    
+#     # index.query()
+#     # db = FAISS.load_local(DB_FAISS_PATH, embeddings, allow_dangerous_deserialization=True)
+    
+#     db = PineconeVectorStore(index_name = "langchain-ned-data", embedding = embeddings)
+#     retriever = db.as_retriever()
+    
+#     # Load the language model
+#     llm = load_llm()
+    
+#     # Create a history-aware retriever
+#     history_retriever = history_aware_retriever(retriever, llm)
+    
+#     # Set up the conversational QA chain
+#     rag_chain = get_conversational_chain(history_retriever, llm)
+    
+#     # Invoke the chain with user input and chat history
+#     response = rag_chain.invoke({"input": user_question, "chat_history": chat_history})
+    
+#     # Update chat history
+#     chat_history.extend([user_question, response["answer"]])
+#     print(chat_history)
+    
+#     # Check if chat exists in the database and update or create new chat accordingly
+#     if chat_obj.does_chat_exist(user_chat_details):
+#         chat_obj.update_existing_chat(
+#             user_chat_details['user_id'],
+#             user_chat_details['chat_id'],
+#             chat_history
+#         )
+#     else:
+#         chat_obj.create_new_chat(
+#             user_chat_details['user_id'],
+#             user_chat_details['chat_id'],
+#             chat_history
+#         )
+    
+#     return response
