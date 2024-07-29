@@ -1,9 +1,9 @@
 # Import necessary libraries and modules
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+# from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_openai import OpenAIEmbeddings
 from langchain_groq import ChatGroq
 from langchain_openai import ChatOpenAI
-import google.generativeai as genai
+# import google.generativeai as genai
 from langchain_community.vectorstores.faiss import FAISS
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
@@ -22,7 +22,7 @@ from pinecone import Pinecone
 load_dotenv()
 
 # Configure Google Generative AI API key
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+# genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 # Set Groq API key
 groq_api_key = os.getenv('GROQ_API_KEY')
@@ -129,11 +129,12 @@ def get_conversational_chain(history_aware_retriever, llm):
     If you don't know the answer, just say that you don't know. Don't try to make wrong answers \
     Don't give answer to irrelevant or abusive questions and words, just apologize\
     Keep the answer concise and well formatted with a professional and friendly tone.\
-    Always remember that your scope is limited to NED University and guiding students, if you get question out of this scope, command the user to search this on Google, don't try to answer it by yourself.\
+    Always remember that your scope is limited to NED University and guiding students, if you get question out of this scope, command the user to search this on the internet, don't try to answer it by yourself.\
     When user asks information of department(s) always tell them to visit the department website and ask them if they want the website link.\
     If users ask to conduct or generate a mockup or sample test paper, make a detailed sample test with all the relevant sections.\
     Check the language of the prompt and try to answer in that language.\
-    Always welcome and appreciate for reaching out and offer students more help in the end and call to action and include contact or email if possible.
+    If user ask about some person or faculty member, always start by their introduction, what department and position they belong to.\
+    Always welcome and appreciate for reaching out and offer students more help in the end and call to action and include contact or email or relevant website link(s) if possible.\
 
     {context}"""
     
@@ -169,10 +170,10 @@ def user_input(user_question):
     # Set OPEN AI embeddings
     embeddings = OpenAIEmbeddings(model='text-embedding-3-large')
     
-    # Load saved vectors from the local path
-    pc = Pinecone(pinecone_api_key)
+    # # Load saved vectors from the local path
+    # pc = Pinecone(pinecone_api_key)
     
-    index = pc.Index('langchain-ned-data')
+    # index = pc.Index('langchain-ned-data')
     
     # index.query()
     # db = FAISS.load_local(DB_FAISS_PATH, embeddings, allow_dangerous_deserialization=True)
@@ -193,21 +194,21 @@ def user_input(user_question):
     response = rag_chain.invoke({"input": user_question, "chat_history": chat_history})
     
     # Update chat history
-    chat_history.extend([user_question, response["answer"]])
-    print(chat_history)
+    # chat_history.extend([user_question, response["answer"]])
+    # print(chat_history)
     
-    # Check if chat exists in the database and update or create new chat accordingly
-    if chat_obj.does_chat_exist(user_chat_details):
-        chat_obj.update_existing_chat(
-            user_chat_details['user_id'],
-            user_chat_details['chat_id'],
-            chat_history
-        )
-    else:
-        chat_obj.create_new_chat(
-            user_chat_details['user_id'],
-            user_chat_details['chat_id'],
-            chat_history
-        )
+    # # Check if chat exists in the database and update or create new chat accordingly
+    # if chat_obj.does_chat_exist(user_chat_details):
+    #     chat_obj.update_existing_chat(
+    #         user_chat_details['user_id'],
+    #         user_chat_details['chat_id'],
+    #         chat_history
+    #     )
+    # else:
+    #     chat_obj.create_new_chat(
+    #         user_chat_details['user_id'],
+    #         user_chat_details['chat_id'],
+    #         chat_history
+    #     )
     
     return response

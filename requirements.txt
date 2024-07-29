@@ -1,9 +1,9 @@
-google-generativeai
+# google-generativeai
 python-dotenv
 langchain
 pypdf
 faiss-cpu
-langchain_google_genai
+# langchain_google_genai
 langchain-community
 fastapi
 pydantic

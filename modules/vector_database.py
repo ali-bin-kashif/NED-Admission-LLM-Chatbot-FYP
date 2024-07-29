@@ -1,5 +1,5 @@
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+# from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores.faiss import FAISS
 from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader
@@ -57,6 +57,8 @@ def create_vector_db():
         'https://cct.neduet.edu.pk/aboutus', 
         'https://cct.neduet.edu.pk/achievements', 
         'https://cis.neduet.edu.pk/' , 
+        'https://cct.neduet.edu.pk/faculty',
+        'https://cct.neduet.edu.pk/faculty_achievements',
         'https://cis.neduet.edu.pk/about_us', 
         'https://se.neduet.edu.pk/'
     ]).load()
@@ -161,7 +163,7 @@ def add_docs(documents):
     
 if __name__ == "__main__":
     # Uncomment the following lines to execute the desired functions
-    # create_vector_db()
+    create_vector_db()
     # delete_all_embeddings()
-    add_docs()
+    # add_docs()
     
