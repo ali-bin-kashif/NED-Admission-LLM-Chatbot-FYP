@@ -20,3 +20,4 @@ PyMuPDF
 frontend
 boto3
 botocore
+bs4
