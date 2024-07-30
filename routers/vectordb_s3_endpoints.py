@@ -36,7 +36,7 @@ router = APIRouter(
     tags=['Chatbot knowledge base endpoints']
 )
 
-@router.post("/uploadfiles/")
+@router.post("/uploadfiles")
 async def upload_files(files: Annotated[list[UploadFile], File()]):
     """
     Uploads multiple files to an S3 bucket and extracts text content from PDFs.
@@ -78,7 +78,7 @@ async def upload_files(files: Annotated[list[UploadFile], File()]):
     
     return {"file_urls": file_urls, "message": "Files uploaded to S3 successfully"}
 
-@router.post("/extract-and-store-sites/")
+@router.post("/extract-and-store-sites")
 async def extract_and_store_webpages(urls: models.webURLS):
     """
     Extracts content from a list of URLs and stores them in the vector database.
@@ -107,7 +107,7 @@ async def extract_and_store_webpages(urls: models.webURLS):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/get-all-files/")
+@router.get("/get-all-files")
 async def get_all_files_s3():
     """
     Retrieves all files from the S3 bucket.
@@ -136,7 +136,7 @@ async def get_all_files_s3():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.delete("/delete-all-files/")
+@router.delete("/delete-all-files")
 async def delete_all_files():
     """
     Deletes all files from the S3 bucket and their embeddings from the vector database.
