@@ -4,6 +4,22 @@
 
 The university admission chatbot is a useful tool designed to provide assistance and information by answering general student queries during university admissions using state-of-the-art language models and vector stores.
 
+### Problem Identified:
+Handling a high volume of inquiries during university admissions can overwhelm staff and significantly slow down response times. Many students seek general information, which can lead to delays as staff address repetitive queries manually. This inefficiency not only strains resources but also negatively impacts the user experience. To address these challenges, we are developing a university admission chatbot that leverages Generative AI and advanced language models to provide instant, accurate responses, streamline the admissions journey, and reduce the workload on university staff.
+
+### Roles and Responsibilities:
+
+- Developed a university admissions chatbot to assist with student queries, admissions processes and guidelines using large language models and vector stores.
+- Utilized state-of-the-art LLMs (Llama3, Gemini Pro, GPT-4o) and integrated LangChain and FastAPI for backend functionalities, with a frontend built in Next.js.
+- Implemented an authentication system with chat history save and retrieval for users.
+- Created a FastAPI-based API with robust endpoints for user authentication, chatbot interaction, and admin operations including data embedding and CRUD functions.
+- Created a document embedding system allowing admins to add, remove, and update data files in the vector database, ensuring up-to-date and correct data.
+- Deployed infrastructure with LangChain, PineCone, AWS RDS, and S3 Buckets to ensure scalability and robustness.
+- Built a user-friendly frontend on Next.js with different features of easy user experience.
+
+### Product Impact:
+Transformed the university admissions process by efficiently handling high inquiry volumes, streamlining the journey with instant responses, reducing staff workload, and enhancing the institution's reputation for technological innovation.
+
 ## Prerequisites
 
 Before you can start using the  ChatBot, make sure you have the following prerequisites installed on your system:
